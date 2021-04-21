@@ -1,0 +1,1608 @@
+<html>
+	<head>
+		<title>Threequencer</title>
+
+		<meta property="og:title" content="Threequencer by Ray Interactive">
+		<meta property="og:description" content="A 3-Dimensional Step Sequencer">
+		<meta property="og:image" content="https://ray.scot/threequencer/thumb2.jpg">
+		<meta property="og:url" content="https://ray.scot/threequencer/">
+		<meta property="og:type" content="website" />
+
+		<meta name="twitter:title" content="Threequencer by Ray Interactive">
+		<meta name="twitter:description" content="A 3-Dimensional Step Sequencer">
+		<meta name="twitter:image" content="https://ray.scot/threequencer/thumb.jpg">
+		<meta name="twitter:card" content="summary_large_image">
+
+		<link rel="preconnect" href="https://fonts.gstatic.com">
+		<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Major+Mono+Display&display=swap" rel="stylesheet">
+
+		<style>
+			body,html {
+				font-family:'Major Mono Display',monospace;
+				
+				overflow:hidden;
+				margin:0;
+				padding:0;
+				background-color:#0d0121;
+				color:white;
+			}
+			h1 {
+				font-weight:normal;
+				font-family:'Share Tech Mono', monospace;
+			}
+			.help {
+
+			    position: fixed;
+			    bottom: 15px;
+			    left: 15px;
+			    border: 1px solid white;
+			    border-radius: 50%;
+			    width: 20px;
+			    height: 20px;
+			    text-align: center;
+			    line-height: 20px;
+			    font-size: 15px;
+			    font-family: 'Share Tech Mono';
+			}
+			.intro {
+				position:fixed;
+				width:100%;
+				height:100%;
+				overflow:hidden;
+				background-color:#0d0121;
+			}
+			.center,.overlay {
+				margin:0 auto;
+				position: relative;
+				top: 50%;
+				transform: translateY(-50%);
+				text-align:center;
+			}
+			#start {
+				font-size:25px;
+				padding:15px;
+				border:1px solid #aaaaaa;
+				border-radius:10px;
+				width:150px;
+				display:block;
+				margin:0 auto;
+				display:none;
+				background-color:rgb(0,0,0,0.5);
+			}
+			#controlsRight {
+				position:fixed;
+				right:15px;
+				top:15px;
+				min-width:195px;
+				border-radius:10px;
+				padding:10px;
+				padding-bottom:0;
+				border:1px solid #ffff00;
+				background-color:rgba(0,0,0,0.3);
+			}
+			#controlsLeft {
+				position:fixed;
+				min-width:195px;
+				left:15px;
+				top:15px;
+				border-radius:10px;
+				padding:10px;
+				padding-bottom:0;
+				border:1px solid #00ffff;
+				background-color:rgba(0,0,0,0.3);
+			}
+			#controlsLeft,#controlsRight {
+				transition:all 0.5s;
+				opacity:0.5;
+				margin-bottom:-10px;
+			}
+			#controlsLeft:hover,#controlsRight:hover {
+				opacity:1;
+			}
+			.editablePattern {
+				background-color:#111111;
+				border-radius:5px;
+			}
+			.column {
+				padding:2px;
+				padding-bottom:0;
+				width:19px;
+				float:left;
+			}
+			.cell {
+				width:17px;
+				height:17px;
+				background-color:#333333;
+				margin-bottom:2px;
+			}
+			.cell.active {
+			}
+
+			.controlHeading {
+				font-size:11px;
+				line-height:12px;
+				margin-bottom:8px;
+				color:#888888;
+				padding-bottom:5px;
+				border-bottom:1px solid #666666;
+			}
+			.controlOption {
+				padding:10px;
+				background-color:rgb(255,255,255,0.1);
+				border-radius:5px;
+				margin-bottom:8px;
+				opacity:0.33;
+			}
+			.controlOption.selected {
+				opacity:1;
+			}
+			.controlOptionTitle {
+				font-size:12px;
+				line-height:13px;
+				border-left:3px solid rgba(255,255,255,.5);
+				padding-left:5px;
+				margin-bottom:8px;
+			}
+			.controlGroup {
+				margin-bottom:12px;
+			}
+			.selected .controlOptionTitle {
+
+				border-left:3px solid rgba(255,255,255,.20);
+			}
+			input[type="range"] {
+			  -webkit-appearance: none;
+			  width: 100%;
+			  height: 11px;
+			  background: #d3d3d3;
+			  outline: none;
+			  opacity: 0.7;
+			  -webkit-transition: .2s;
+			  transition: opacity .2s;
+			  margin:0;
+			}
+
+			input[type="range"]:hover {
+			  opacity: 1;
+			}
+			input[type="text"] {
+				width:100%;
+				margin:0;
+				font-size:13px;
+				line-height:13px;
+				background-color:#666666;
+				border:none;
+			}
+
+			input[type="range"]::-webkit-slider-thumb {
+			  -webkit-appearance: none;
+			  appearance: none;
+			  width: 15px;
+			  height: 15px;
+			  background: #444444;
+			  cursor: pointer;
+			}
+
+			input[type="range"]::-moz-range-thumb {
+			  width: 15px;
+			  height: 15px;
+			  background: #444444;
+			  cursor: pointer;
+			}
+			.editablePattern:after,.controlGroup:after {
+			  content: "";
+			  display: table;
+			  clear: both;
+			}
+			.label {
+				float:right;
+				display:inline-block;
+			}
+			.loader {
+			  font-size: 10px;
+			  margin: 50px auto;
+			  text-indent: -9999em;
+			  width: 11em;
+			  height: 11em;
+			  border-radius: 50%;
+			  margin-top:0;
+			  background: #ffffff;
+			  background: -moz-linear-gradient(left, #ffffff 10%, rgba(255, 255, 255, 0) 42%);
+			  background: -webkit-linear-gradient(left, #ffffff 10%, rgba(255, 255, 255, 0) 42%);
+			  background: -o-linear-gradient(left, #ffffff 10%, rgba(255, 255, 255, 0) 42%);
+			  background: -ms-linear-gradient(left, #ffffff 10%, rgba(255, 255, 255, 0) 42%);
+			  background: linear-gradient(to right, #ffffff 10%, rgba(255, 255, 255, 0) 42%);
+			  position: relative;
+			  -webkit-animation: load3 1.4s infinite linear;
+			  animation: load3 1.4s infinite linear;
+			  -webkit-transform: translateZ(0);
+			  -ms-transform: translateZ(0);
+			  transform: translateZ(0);
+			}
+			.loader:before {
+			  width: 50%;
+			  height: 50%;
+			  background: #ffffff;
+			  border-radius: 100% 0 0 0;
+			  position: absolute;
+			  top: 0;
+			  left: 0;
+			  content: '';
+			}
+			.loader:after {
+			  background: #009999;
+			  width: 75%;
+			  height: 75%;
+			  border-radius: 50%;
+			  content: '';
+			  margin: auto;
+			  position: absolute;
+			  top: 0;
+			  left: 0;
+			  bottom: 0;
+			  right: 0;
+			}
+			.half {
+				float:left;
+				width:48%;
+			}
+			.controlOption.half,.controlOption.share {
+				margin-bottom:0;
+			}
+			.half:first-of-type {
+				margin-right:2%;
+			}
+			.half:last-of-type {
+				margin-left:2%;
+			}
+			.main {
+				display:none;
+			}
+			.button {
+				text-align:center;
+				cursor:pointer;
+			}
+			.stop {
+				background-color:#550000;
+			}
+			.yellow {
+				color:#FFFF00;
+			}
+			.blue {
+				color:#00FFFF;
+			}
+			.play {
+				background-color:#005500;
+			}
+			.clear {
+				background-color:rgba(255,255,255,0.2);
+			}
+
+			.share {
+				background-color:#005555;
+			}
+			#logo {
+				position:fixed;
+				right:20px;
+				bottom:20px;
+			}
+			#logo img {
+				display:block;
+				width:65px;
+			}
+
+			@-webkit-keyframes load3 {
+			  0% {
+			    -webkit-transform: rotate(0deg);
+			    transform: rotate(0deg);
+			  }
+			  100% {
+			    -webkit-transform: rotate(360deg);
+			    transform: rotate(360deg);
+			  }
+			}
+			@keyframes load3 {
+			  0% {
+			    -webkit-transform: rotate(0deg);
+			    transform: rotate(0deg);
+			  }
+			  100% {
+			    -webkit-transform: rotate(360deg);
+			    transform: rotate(360deg);
+			  }
+			}
+			html,* {
+			  box-sizing: border-box;
+			}
+			*, *:before, *:after {
+			  box-sizing: inherit;
+			}
+			.modalOuter {
+				position:fixed;
+				width:100%;
+				height:100%;
+				background-color:rgba(13,1,33,0.75);
+				display:none;
+				z-index:1000000;
+			}
+			.overlay {
+				background-color: rgba(0,0,0,0.5);
+			    border-radius: 5px;
+			    margin: 0 auto;
+			    /* margin-left: 30px; */
+			    /* margin-right: 30px; */
+			    width: 1000px;
+			    max-width: 90%;
+			    position: relative;
+			    padding: 15px;
+			}
+			a.close {
+
+			    position: absolute;
+			    top: 10px;
+			    right: 15px;
+			    font-size:25px;
+			    width:15px;
+			    height:15px;
+			}
+			.overlay h3 {
+				margin:0;
+				padding:0;
+   				margin-bottom: 15px;
+   				padding-right:20px;
+			}
+			form {
+				margin:0;
+				padding:0;
+			}
+			#shareBox {
+				display:block;
+				width:100%;
+				height:165px;
+				border-radius: 5px;
+			    background-color: #aaaaaa;
+			    color: #222222;
+			    padding: 10px;
+			    font-size:17px;
+			    line-height:20px;
+			    font-family: Helvetica,Arial,sans-serif;
+			}
+			#controlLinks {
+				display:none;
+			}
+			.nextPattern,.prevPattern {
+				   float: right;
+			    display: block;
+			    font-size: 20px;
+			    margin-top: -2px;
+			}
+			.mTop {
+				padding-top:8px;
+				margin-bottom:0;
+			}
+			@media screen and (max-width:800px) {
+
+				.mTop {
+					padding-top:4px;
+				}
+				#controlLinks {
+					position:fixed;
+					display:block;
+					left:10px;
+					top:10px;
+				}
+				.controlLink {
+					display:block;
+					top:10px;
+					width:25px;
+					height:25px;
+					border-radius:50%;
+					position:fixed;
+					left:10px;
+					margin-right:10px;
+					background-color:#ffff00;
+				}
+				.controlLink:nth-of-type(2) {
+					background-color:#00ffff;
+					top:45px;
+				}
+				#controlsLeft,#controlsRight {
+					display:none;
+					background-color:rgba(0,0,0,0.9);
+					opacity:1;
+					right:15px;
+					width:auto;
+				    top: 10px;
+				    left: 45px;
+				}
+				.controlOption {
+					padding:9px;
+				}
+				.column {
+					width:12.5%;
+				}
+				.cell {
+					width:100%;
+					height:3 vh;
+				}
+				#shareBox {
+					height:60vh;
+				}
+				.help {
+					left:10px;
+					bottom:10px;
+				}
+				#logo {
+					right:10px;
+					bottom:10px;
+				}
+				p {
+					font-size:12px;
+					line-height:14px;
+					margin:0;
+					padding:0;
+					text-align:left;
+					margin-bottom:13px;
+				}
+				p:last-of-type {
+					margin-bottom:0;
+				}
+			}
+		</style>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,minimum-scale=1">
+		<meta name="theme-color" content="#0d0121">
+
+		<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-V03BZ32P9T"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-V03BZ32P9T');
+</script>
+	</head>
+	<body>
+		<div class="modalOuter">
+			<div class="overlay share">
+				<a class="close">&times;</a>
+				<h3>Copy and paste this URL to share your creation</h3>
+				<form><textarea name="shareLink" id="shareBox"></textarea></form>
+			</div>
+			<div class="overlay instructions">
+				<a class="close">&times;</a>
+				<h3>THREEQUENCER BY RAY</h3>
+				<p>Threequencer adds an extra dimension to the traditional 2D step sequencer.</p>
+				<p>The <span class="blue">blue frame</span> represents the play head moving through a sequence at the transport's BPM (beats per minute). The <span class="yellow">yellow frame</span> is the third 'z' dimension that determines which of six separate step sequencers is currently audible. In LFO (low-frequency oscillator) mode, the z position moves periodically. In manual mode you can move it with the slider. </p>
+				<p>Each sequence can be programmed in the 'pattern' panel, and has its own reverb and filter (cutoff) values. As the z position moves from one sequence to another, it interpolates these values along with the sequences' audio levels, producing interesting effects.</p>
+				<p>Spin the 3D view by clicking/tapping and dragging. Clear all sequences with the CLR button; generate random sequences with the RND button.</p>
+
+			</div>
+		</div>
+		<div class="main">
+			<div class="help">
+				?
+			</div>
+			<div id="controlLinks">
+				<div class="controlLink" data-id="controlsRight"></div>
+				<div class="controlLink" data-id="controlsLeft"></div>
+			</div>
+
+			<div id="logo">
+				<a href="https://rayinteractive.org" target="_blank"><img src="ray_logo.png" alt="Threequencer by Ray Interactive" /></a>
+			</div>
+			<div id="controlsLeft">
+				<div class="patternEditor"></div>
+				<div class="controlGroup">
+					<div class="controlHeading">
+						General
+					</div>
+					
+
+					<div class="controlOption half clear selected" data-stateless="true" data-setting="clearAll" data-value="1">
+						<div class="button">CLR</div>
+					</div>
+					<div class="controlOption half random selected" data-stateless="true" data-setting="randAll" data-value="1">
+						<div class="button">RND</div>
+					</div>
+				</div>
+				<div class="controlGroup mTop">
+					<div class="controlHeading">
+						Transport
+					</div>
+					<div class="controlOption selected" data-setting="transport" data-value="na">
+						<div class="controlOptionTitle">BPM <span class="label">240</span></div>
+						<div class="controlWidget">		
+	  						<input name="bpm" type="range" min="60" max="360" step="1" value="240" lastVal="-1">
+						</div>
+					</div>
+					
+				</div>
+				<div class="controlGroup">
+					<div class="controlOption half stop" data-setting="playing" data-value="0">
+						<div class="button">stop</div>
+					</div>
+					<div class="controlOption half play selected" data-setting="playing" data-value="1">
+						<div class="button">play</div>
+					</div>
+				</div>
+			</div>
+			<div id="controlsRight">
+				<div class="controlGroup">
+					<div class="controlHeading">
+						Z mode
+					</div>
+					
+					<div class="controlOption selected" data-setting="zMode" data-value="periodic">
+						<div class="controlOptionTitle">LFO speed <span class="label">0.652</span></div>
+						<div class="controlWidget">		
+	  						<input name="zSpeed" type="range" min="0.01" max="3" step=".002" value="0.652" lastVal="-1">
+						</div>
+					</div>
+					<div class="controlOption" data-setting="zMode" data-value="manual">
+						<div class="controlOptionTitle">Manual <span class="label">0.999</span></div>
+						<div class="controlWidget">		
+	  						<input name="zManual" type="range" min="0.001" max=".999" step=".001" value=".999" lastVal="-1">
+						</div>
+					</div>
+
+				</div>
+				
+
+				<div class="controlGroup">
+					
+					
+					<div class="controlHeading">
+						Settings
+					</div>
+
+					
+					<div class="controlOption selected" data-setting="audio" data-value="na">
+						<div class="controlOptionTitle">Volume <span class="label">0.7</span></div>
+						<div class="controlWidget">		
+	  						<input name="volume" type="range" min="0" max="1" step=".05" value="0.7" lastVal="-1">
+						</div>
+					</div>
+					
+				</div>
+				<div class="controlGroup">
+					
+					<div class="controlOption share selected " data-stateless="true" data-setting="save" data-value="1">
+						<div class="button">share</div>
+					</div>
+					
+				</div>
+			</div>
+			
+		</div>
+		<div class="intro">
+				<div class="center">
+					<div class="loader">Loading...</div>
+					<div id="start">stArt</div>
+				</div>
+			</div>
+	</body>
+	<script src="js/jquery-3.5.1.min.js"></script>
+	<script src="js/Tone.js"></script>
+	<script src="js/tween.umd.js"></script>
+	<script type="module">
+		import * as THREE from './three.js/build/three.module.js';
+		import { OrbitControls } from "./three.js/examples/jsm/controls/OrbitControls.js";
+		import { EffectComposer } from './three.js/examples/jsm/postprocessing/EffectComposer.js';
+		import { RenderPass } from './three.js/examples/jsm/postprocessing/RenderPass.js';
+		import { UnrealBloomPass } from './three.js/examples/jsm/postprocessing/UnrealBloomPass.js';
+
+		(function(){
+
+
+			// bind controls
+			$(document).on('click','.controlGroup .controlOption',function(){
+				if(!$(this).hasClass('selected')||$(this).attr('data-stateless')=="true") {
+
+					if($(this).attr('data-stateless')!="true") {
+						var p = $(this).closest('.controlGroup');
+						p.find('.controlOption').removeClass('selected').each(function(){
+							// $(this).find('input').prop('disabled',true);
+						});
+						$(this).addClass('selected');
+						$(this).find('input').prop('disabled',false);
+					}
+					var a = $(this).data('setting');
+					var v = $(this).data('value');
+
+					threeq[a] = v;
+
+				}
+
+			});
+
+			$(document).on('input change blur keyup','.controlGroup input',function(){
+				var last = $(this).attr('lastVal');
+				var val  = parseFloat($(this).val());
+				var a = $(this).attr('name');
+				if(last!=val && !isNaN(val)) {	
+					var t = a.split(':');
+					
+					if(t.length==2) {
+						threeq[t[0]][t[1]] = val;
+					} else {
+						threeq[a] = val;
+					}
+					$(this).attr('lastVal',val);
+					var l = $(this).closest('.controlOption').find('.label');
+					if(l.length) l.html(val);
+				}
+				var p = $(this).closest('.controlOption').click();
+			});
+
+			$('.controlOption.share').click(function(e){
+				e.preventDefault();
+				$('.modalOuter .overlay').hide();
+				$('.modalOuter .overlay.share').show();
+				$('.modalOuter').fadeIn(300,function(){
+					$('textarea')[0].select();
+				});
+			});
+
+			$('.modalOuter').click(function(e){
+				if($(e.target).hasClass('modalOuter')) {
+					$(this).fadeOut(300);
+				}
+			});
+
+			$('.help').click(function(e){
+				e.preventDefault();
+				$('.modalOuter .overlay').hide();
+				$('.modalOuter .overlay.instructions').show();
+				$('.modalOuter').fadeIn(300);
+			});
+
+			$('a.close').click(function(e){
+				e.preventDefault();
+				$('.modalOuter').fadeOut(500);
+			});
+
+			$('.controlLink').click(function(){
+				var t = $('#'+$(this).attr('data-id'));
+				if(t.is(':visible')) {
+					t.hide();
+				} else {
+					$('#controlsLeft,#controlsRight').hide();
+					t.show();
+				}
+				
+			});
+
+
+			class Threeq {
+				constructor(options={}) {
+					
+					console.log('initialising ThreeQ instance');
+					this.bpm = 240;
+					this._volume = 0.7;
+					this.zMode = 'periodic';
+					this.zManual = 0.999;
+					this.cubeSize = 0.5;
+					this.background = '#0d0121';
+					this.cameraPositionZ = 8;
+					this.kitUrls = [
+						[
+							{
+								0: "RDM_Analog_MT40-Kick01.wav",
+								1: "RDM_Analog_MT40-Snr01.wav",
+								2: "RDM_Analog_MT40-ClHat.wav",
+								3: "RDM_Analog_MT40-OpHat01.wav"
+							}
+						],
+						[
+							{
+								0: "RDM_Analog_MT40-Kick02.wav",
+								1: "RDM_Analog_MT40-Snr02.wav",
+								2: "RDM_Analog_SR88-ClHat.wav",
+								3: "RDM_Analog_MT40-OpHat02.wav"
+							}
+						],
+						[
+							{
+								0: "RDM_Analog_SR88-Kick.wav",
+								1: "RDM_Analog_SR88-Snr.wav",
+								2: "RDM_Analog_SY1-ClHat.wav",
+								3: "RDM_Analog_SR88-OpHat.wav"
+							}
+						],
+						[
+							{
+								0: "RDM_Analog_SY1-Kick01.wav",
+								1: "RDM_Analog_SY1-Snr01.wav",
+								2: "RDM_Analog_MT40-Clave.wav",
+								3: "RDM_Analog_SY1-Perc02.wav"
+							}
+						],		
+						[
+							{
+								0: "RDM_Analog_SR88-Kick.wav",
+								1: "RDM_Analog_SR88-Snr.wav",
+								2: "RDM_Analog_SY1-ClHat.wav",
+								3: "RDM_Analog_SR88-OpHat.wav"
+							}
+						],
+						[
+							{
+								0: "RDM_Analog_SY1-Kick01.wav",
+								1: "RDM_Analog_SY1-Snr01.wav",
+								2: "RDM_Analog_MT40-Clave.wav",
+								3: "RDM_Analog_SY1-Perc02.wav"
+							}
+						],
+
+					];	
+
+
+					this.cutoffs = [
+						16000,
+						5000,
+						12000,
+						20000,
+						3000,
+						6000,
+					];
+					this.reverbs = [
+						0,
+						.5,
+						.2,
+						0,
+						0,
+						0.4,
+					];
+
+					this.patterns = [
+						["0,2","","2","","1,2","","2","3"],
+						["3","2","2","","0,2","2","","3"],
+						["0,3","3","3","2","1","0","","3"],
+						["2","2","","2","","2","2","1"],
+						["0,2","","2","","1,2","","2","3"],
+						["3","2","2","","0,2","2","","3"],
+					];
+
+					this.masterGain = new Tone.Gain(this._volume).toDestination();
+
+
+					this.zSpeed = 0.652;
+
+					for(var i in options) {
+						this[i]=options[i];
+					}
+
+
+					this.applySettings();
+
+
+					this.scene = new THREE.Scene();
+					this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+
+					this.renderer = new THREE.WebGLRenderer({antialias:true});
+
+  					this.renderer.setPixelRatio(devicePixelRatio);
+
+					this.renderer.setSize( window.innerWidth, window.innerHeight );
+					document.body.appendChild( this.renderer.domElement );
+
+					this.light = new THREE.PointLight( 0xffffff, 2 );
+					this.light.position.set( 20, 20, 20 );
+					this.scene.add( this.light );
+
+					this.geometry = new THREE.BoxGeometry(this.cubeSize,this.cubeSize,this.cubeSize);
+					this.edges = new THREE.WireframeGeometry(this.geometry);
+					this.scene.background = new THREE.Color(this.background);
+
+					this.controls = new OrbitControls( this.camera, this.renderer.domElement );
+					this.controls.addEventListener('change',() => this.renderer.render(this.scene,this.camera));
+					this.camera.position.z = this.cameraPositionZ;
+
+
+					this.positions = [];
+					for(var i=0;i<this.patterns[0].length;i++) this.positions.push(i);
+
+					this.kits = [];
+					this.seq = null;
+
+					this.tweenStates = [];
+
+					this.steps = this.patterns[0].length;
+
+					this.tracks = 0;
+					for(var i in this.kitUrls[0][0]) this.tracks++;
+
+					this.gains = [];
+					this.cubes = {};
+					this.cubeArr = [];
+					this.materials = {};
+					this.offmaterials = {};
+
+					this.compressor = new Tone.Compressor(-30,3).connect(this.masterGain);
+					this.filter = new Tone.Filter(20000,"lowpass").connect(this.compressor);
+					this.reverb = new Tone.Reverb(1).connect(this.filter);
+					this.reverb.set({wet:0});
+
+
+					this.offsets = {
+						x:-.5+this.steps/2,
+						y:-.5+this.tracks/2,
+						z:-.5+this.kitUrls.length/2
+					}
+
+					this.pGeom = new THREE.PlaneGeometry( this.steps+0.25, this.tracks+0.25 );
+					this.pMat = new THREE.MeshBasicMaterial({
+						color:0xffffff,
+						side:THREE.DoubleSide,
+						transparent:true,
+						opacity:0.25
+					});
+					
+					this.zPlanePoints = [];
+					this.zMargin = 0.6;
+
+
+					this.zPlanePoints.push(new THREE.Vector3(-(this.offsets.x+this.zMargin),-(this.offsets.y+this.zMargin),-this.offsets.z));
+					this.zPlanePoints.push(new THREE.Vector3(this.offsets.x+this.zMargin,-(this.offsets.y+this.zMargin),-this.offsets.z));
+					this.zPlanePoints.push(new THREE.Vector3(this.offsets.x+this.zMargin,this.offsets.y+this.zMargin,-this.offsets.z));
+					this.zPlanePoints.push(new THREE.Vector3(-(this.offsets.x+this.zMargin),this.offsets.y+this.zMargin,-this.offsets.z));
+					this.zPlanePoints.push(new THREE.Vector3(-(this.offsets.x+this.zMargin),-(this.offsets.y+this.zMargin),-this.offsets.z));
+
+					this.zPlaneGeom = new THREE.BufferGeometry().setFromPoints(this.zPlanePoints);
+
+					this.pLineMaterial = new THREE.LineBasicMaterial( { color: 0xffff00, transparent: true, opacity: 0.88, depthTest:false } );
+					this.xyLineMaterial = new THREE.LineBasicMaterial( { color: 0x00ffff, transparent: true, opacity: 0.88, depthTest:false } );
+					// this.blitzMaterial = new THREE.LineBasicMaterial( { color: 0xffffff, transparent: true, opacity: 0.88, depthTest:false } );
+					this.zPlane = new THREE.Line(this.zPlaneGeom,this.pLineMaterial);
+					this.scene.add(this.zPlane);
+
+
+					this.xyPlanePoints = [];
+
+					this.xyPlanePoints.push(new THREE.Vector3(-this.offsets.x-this.zMargin,-(this.offsets.y+this.zMargin),-(this.offsets.z+this.zMargin)));
+					this.xyPlanePoints.push(new THREE.Vector3(-this.offsets.x-this.zMargin,-(this.offsets.y+this.zMargin),(this.offsets.z+this.zMargin)));
+					this.xyPlanePoints.push(new THREE.Vector3(-this.offsets.x-this.zMargin,(this.offsets.y+this.zMargin),(this.offsets.z+this.zMargin)));
+					this.xyPlanePoints.push(new THREE.Vector3(-this.offsets.x-this.zMargin,(this.offsets.y+this.zMargin),-(this.offsets.z+this.zMargin)));
+					this.xyPlanePoints.push(new THREE.Vector3(-this.offsets.x-this.zMargin,-(this.offsets.y+this.zMargin),-(this.offsets.z+this.zMargin)));
+
+					this.xyPlaneGeom = new THREE.BufferGeometry().setFromPoints(this.xyPlanePoints);
+					this.xyPlane = new THREE.Line(this.xyPlaneGeom,this.xyLineMaterial);
+					this.xyPlane.position.set(0,0,0);
+					this.scene.add(this.xyPlane);
+
+					// set up raycasting
+				
+					this.mouse = new THREE.Vector2();
+					this.rcThreshold = 0.1;
+					this.raycaster = new THREE.Raycaster();
+					this.raycaster.params.Points.threshold = this.rcThreshold;
+
+					var _this = this;
+					document.addEventListener( 'mousemove', function(e) {
+						_this.onDocumentMouseMove(e);
+					});
+					window.addEventListener( 'resize', 
+						_this.debounce(function(e) {
+							_this.onWindowResize(e);
+						})
+					);
+					this.renderer.domElement.addEventListener( 'click', function(e) {
+						if(_this.castPlane>-1) {
+							$('.patternEditor').html(_this.renderEditablePattern(_this.castPlane));
+						}
+					});
+
+					this.opacities = {
+						'min':0.15,
+						'max':0.9,
+						'off':0.05
+					}
+
+
+					/* var loadSamples = {};
+					for(var i=0;i<this.kitUrls.length;i++) {
+						for(var k in this.kitUrls[i][0]) {
+							loadSamples[i+'-'+k]='./audio/'+this.kitUrls[i][0][k];
+						}
+					}
+
+					// preload samples
+					this.preloadSamples = new Tone.ToneAudioBuffers(
+						loadSamples
+						, () => { */
+						
+
+					console.log('finished initialising');
+
+					for(var z in this.kitUrls) {
+
+						// add geometry
+						for(var x=0;x<this.steps;x++) {
+							for(var y=0;y<this.tracks;y++) {
+
+								// determine if needed
+								var hits = this.patterns[z][x];
+								hits = hits.split(',');
+								
+								var r = Math.round(200-((y/this.tracks)*55));
+								var g = Math.round(55+((y/this.tracks)*200));
+								var b = Math.round(55+((z/this.kitUrls.length)*200));
+
+								var color = '#'+r.toString(16)+g.toString(16)+b.toString(16);
+
+								var v = 'x'+x+'y'+y+'z'+z;
+
+								this.tweenStates[v] = 0;
+								this.materials[v] = new THREE.MeshBasicMaterial({
+									color: color,
+									opacity: this.opacities.min,
+									transparent: true
+								});
+								this.offmaterials[v] = new THREE.MeshBasicMaterial({
+									color: '#888888',
+									opacity: this.opacities.off,
+									transparent: true
+								});
+								if(hits.includes(y+'')) {
+									this.cubes[v] =  new THREE.Mesh( this.geometry, this.materials[v] );
+									this.cubes[v].name=''+z;
+								} else {
+									this.cubes[v] =  new THREE.Mesh( this.geometry, this.offmaterials[v] );
+									this.cubes[v].name=''+z;
+								}
+
+								this.scene.add( this.cubes[v] );
+								this.cubeArr.push(this.cubes[v]);
+								this.cubes[v].position.set(x-this.offsets.x,y-this.offsets.y,z-this.offsets.z);
+								
+
+								
+							}
+							
+						}
+
+						this.gains.push(new Tone.Gain(0).connect(this.reverb));
+						this.kits.push(new Tone.Players({
+							urls: this.kitUrls[z][0],
+							fadeOut:"0",
+							baseUrl: "./audio/",
+							onload: function() {
+								// callback when they're ready
+								document.querySelector("#start").style.display='block';
+								document.querySelector(".loader").style.display='none';
+								document.querySelector("#start").addEventListener("click", function(e) {
+								   	Tone.start();
+									document.querySelector('.intro').style.display='none';
+									document.querySelector(".main").style.display='block';
+								    _this.start();
+
+								   	// Tone.start();
+								    
+								});
+							}
+						}).connect(this.gains[z]));
+
+						
+					}
+
+					this.initSequencer();
+					this.castPlane = -1;
+
+
+					
+					
+					this.zt = 0;
+					this.xt = 0;
+					this.zScaled = 0;
+					this.zCur = 0;
+					this.zEditing = 0;
+					this.zNext = 1;
+					this.zPrev = this.kits.length-1;
+					this.ztStep = this.ztLength/this.kits.length;
+
+
+					this.xPos = 0;
+
+					this.animFrame = 0;
+					this.prev = 0;
+
+					
+
+
+
+					this._playing = false;
+					this.init = true;
+
+
+
+
+					// post processing
+					this.renderScene = new RenderPass( this.scene, this.camera );
+
+					this.bloomPass = new UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), 1.5, 0.4, 0.85 );
+					this.bloomPass.threshold = 0.4;
+					this.bloomPass.strength = .5;
+					this.bloomPass.radius = 0;
+
+					this.composer = new EffectComposer( this.renderer );
+					this.composer.addPass( this.renderScene );
+					this.composer.addPass( this.bloomPass );
+
+					$('.patternEditor').html(this.renderEditablePattern(0));
+
+					
+
+
+
+					
+
+				}
+
+				debounce(func){
+				  var timer;
+				  return function(event){
+				    if(timer) clearTimeout(timer);
+				    timer = setTimeout(func,100,event);
+				  };
+				}
+				onDocumentMouseMove( event ) {
+
+					this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+					this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+				}
+				onWindowResize() {
+					this.camera.aspect = window.innerWidth / window.innerHeight;
+					this.camera.updateProjectionMatrix();
+
+					this.renderer.setSize( window.innerWidth, window.innerHeight );
+
+				}
+
+				set zSpeed(value) {
+					this.ztLength = 1/value;
+					this._zSpeed = value;
+				}
+				get zSpeed() {
+					return this._zSpeed;
+				}
+
+				set save(value) {
+					// saveable stuff:
+					// patterns, cutoffs, reverbs, LFO speed, manual, zMode, BPM, volume
+					var o = {
+						patterns: this.patterns,
+						cutoffs:  this.cutoffs,
+						reverbs:  this.reverbs,
+						zSpeed:   this.zSpeed,
+						zMode:    this.zMode,
+						bpm:      this.bpm,
+						volume:   this.volume 
+					};
+					$('#shareBox').val('http://ray.scot/threequencer/?state='+window.btoa(JSON.stringify(o)));
+				}
+				applySettings() {
+					var settings = [
+					'bpm','volume','zMode','zSpeed','zManual'
+					];
+					for(var i in settings) {
+						var s = settings[i];
+						$('.controlOption[data-setting="'+s+'"][data-value="'+this[s]+'"]').each(function(){
+							$(this).closest('.controlGroup').find('.controlOption[data-setting="'+s+'"]').removeClass('selected');
+							$(this).addClass('selected').click();
+						});
+						$('.controlWidget input[name="'+s+'"]').val(this[s]).closest('.controlOption').find('.label').html(this[s]);
+					}
+				}
+
+				set clearAll(value) {
+					if(value>0) {
+						for(var i in this.patterns) {
+							for(var j in this.patterns[i]) {
+								this.patterns[i][j]="";
+							}
+						}
+						this.initSequencer();
+					}
+					for(var i in this.cubes) {
+						this.cubes[i].material=this.offmaterials[i];
+					}
+					for(var i in this.cutoffs) {
+						this.cutoffs[i]=20000;
+					}
+					for(var i in this.reverbs) {
+						this.reverbs[i]=0.0;
+					}
+					$('.patternEditor').html(this.renderEditablePattern(this.zCur));
+				}
+				
+				set randAll(value) {
+					if(value>0) {
+						for(var i in this.cubes) {
+							this.cubes[i].material=this.offmaterials[i];
+						}
+						for(var i in this.patterns) {
+							for(var j in this.patterns[i]) {
+								var notes = [];
+								for(var n=0;n<this.tracks;n++) {
+									if(Math.random()>=0.66) {
+										notes.push(n);
+										var v = 'x'+j+'y'+n+'z'+i;
+										
+										this.cubes[v].material=this.materials[v];
+									}
+								}
+								this.patterns[i][j] = notes.join(',');
+							}
+						}
+						for(var i in this.cutoffs) {
+							this.cutoffs[i]=Math.floor(2000+Math.random()*18000);
+						}
+						for(var i in this.reverbs) {
+							this.reverbs[i]=Math.max(0,(Math.random()-0.4).toFixed(2));
+						}
+						this.initSequencer();
+
+						$('.patternEditor').html(this.renderEditablePattern(this.zCur));
+					}
+					
+				}
+				
+				set currentCutoff(value) {
+					this.cutoffs[this.zEditing] = value;
+					this.filter.set({frequency:this.cutoffs[this.zEditing]});
+				}
+				set currentReverb(value) {
+					this.reverbs[this.zEditing] = value;
+					this.reverb.set({wet:this.reverbs[this.zEditing]});
+				}
+				get currentCutoff() {
+					return this.cutoffs[this.zCur];
+				}
+				get currentReverb() {
+					return this.reverbs[this.zCur];
+				}
+
+				get volume() {
+					return this._volume;
+				}
+				set volume(value) {
+					this._volume = value;
+					this.masterGain.gain.value = this._volume;
+				}
+
+				// master sequencer for all kits
+				initSequencer() {
+					
+					if(this.seq !== null) {
+						this.seq.cancel().clear().dispose();
+						this.seq = null;
+					}
+
+					this.seq = new Tone.Sequence((time, position) => {
+					// synth.triggerAttackRelease(note, 0.1, time);
+						for(var k=0;k<this.kits.length;k++) {
+							var n = this.patterns[k][position];
+							if(n!='') {
+								n=n.split(',');
+								for(var j=0;j<n.length;j++) {
+									// console.log('playing note '+n[j]+' on kit '+k);
+									this.kits[k].player(n[j]).start(time);
+								}
+							}
+						}
+						
+						var nextPosition = position+1;
+						if(nextPosition>=this.steps) nextPosition = 0;
+						var prevPosition = position-1;
+						if(prevPosition<0) prevPosition=this.steps-1;
+
+					  	for(var y=0;y<this.tracks;y++) {
+					  		var v = 'x'+position+'y'+y+'z'+this.zCur;
+					  		if(typeof this.materials[v] !== 'undefined') {
+					  			
+					  			this.fadeMat(this.materials[v], this.materials[v].opacity, this.opacities.max, {duration:30});
+					  			
+					  		}
+					  		v = 'x'+prevPosition+'y'+y+'z'+this.zCur;
+					  		if(typeof this.materials[v] !== 'undefined') {
+					  			
+					  			this.fadeMat(this.materials[v], this.materials[v].opacity, this.opacities.min, {duration:300});
+						  			
+					  			
+					  		}
+					  	}
+						
+						// subdivisions are given as subarrays
+					}, this.positions).start(0);
+				}
+
+				activateCell(x,y,z) {
+					if(this.patterns[z][x]=='') {
+						this.patterns[z][x] = y;
+					} else {
+						this.patterns[z][x]+=","+y;
+					}
+					this.initSequencer();	
+					var v = 'x'+x+'y'+y+'z'+z;
+					this.cubes[v].material=this.materials[v];
+				}
+
+				deactivateCell(x,y,z) {
+					var p = this.patterns[z][x].split(',');
+					var n = [];
+					for(var i=0;i<p.length;i++) {
+						if(p[i]!=y+''&&p[i]!='') {
+							n.push(p[i]);
+						}
+						p = n.join(',');
+					}
+					console.log(this.patterns[z][x]);
+					console.log('old '+p);
+					console.log('remove y '+y);
+					console.log(n);
+					this.patterns[z][x] = p;
+					this.initSequencer();	
+					var v = 'x'+x+'y'+y+'z'+z;
+					this.cubes[v].material=this.offmaterials[v];
+				}
+
+				renderEditablePattern(z) {
+					this.zEditing = z;
+					var zB1 = z+1;
+					var reverb = this.reverbs[z];
+					var cutoff = this.cutoffs[z];
+					var html = `<div class="controlGroup">
+				<div class="controlHeading" data-z="`+z+`">
+					Sequence `+zB1+` <span class="nextPattern">&gt;</span><span class="prevPattern">&lt;</span>
+				</div>
+				<div class="controlOption selected" data-setting="transport" data-value="na">`;
+					html += `<div class="controlOptionTitle">PAttern</div><div class="editablePattern">`;
+					
+				
+					 
+					for(var x=0;x<this.steps;x++) {
+						html += `<div class="column">`;
+						var hits = this.patterns[z][x].split(',');
+
+						for(var y=this.tracks-1;y>=0;y--) {
+							var id = 'x'+x+'y'+y+'z'+z;
+							html += `<div x="`+x+`" y="`+y+`" z="`+z+`" class="cell`;
+							var c = this.materials[id].color;
+							var r = c.r*255;
+							var g = c.g*255;
+							var b = c.b*255;
+
+
+							if(hits.includes(y+'')) {
+								html += ` active`;
+								
+								html += `" style="background-color:rgb(`+r+`,`+g+`,`+b+`)`;
+							}	
+							html += `" activecolor="rgb(`+r+`,`+g+`,`+b+`)"></div>`;
+
+						}
+						
+						html += `</div>`;
+						
+					}
+
+
+					html += `</div>`;
+					html += `</div>
+				
+			</div>
+			<div class="controlGroup">
+				<div class="controlHeading">
+					FX
+				</div>
+				<div class="controlOption selected" data-setting="transport" data-value="na">
+					<div class="controlOptionTitle">Cutoff <span class="label">`+cutoff+`</span></div>
+					<div class="controlWidget">		
+  						<input name="currentCutoff" type="range" min="100" max="20000" step="10" value="`+cutoff+`" lastVal="`+cutoff+`">
+					</div>
+				</div>
+				<div class="controlOption selected" data-setting="pattern" data-value="na">
+					<div class="controlOptionTitle">RVB MIX  <span class="label">`+reverb+`</span></div>
+					<div class="controlWidget">		
+  						<input name="currentReverb" type="range" min="0" max="1" step=".01" value="`+reverb+`" lastVal="`+reverb+`">
+					</div>
+				</div>
+				
+			</div>`;
+					return html;
+				}
+
+				step(timestamp) {
+
+
+				  this.raycaster.setFromCamera( this.mouse, this.camera );
+				  var intersections = this.raycaster.intersectObjects( this.cubeArr );
+				  var intersection = ( intersections.length ) > 0 ? intersections[ 0 ] : null;
+				  
+				  if(intersection!==null) {
+				  	var z = parseInt(intersection.object.name);
+			  		if(intersection.object.name!='' && z>-1) {
+			  			this.castPlane = z;
+			  		} else {
+			  			this.castPlane = -1;
+			  		}
+				  }
+				  TWEEN.update();
+				  var diff = timestamp-this.prev;
+				  
+
+				  this.zt+=diff/1000;
+				  this.zt = this.zt%this.ztLength;
+
+				  if(Math.floor(this.xPos+0.05)==Math.floor(this.xPos)) {
+				  	this.xPos+=0.05;
+				  }
+				  this.xyPlane.position.set(this.xPos,0,0);
+
+				  // cube.rotation.x += .01;
+				  // cube.rotation.y += .01;
+
+				  this.controls.update();
+				  this.composer.render(this.scene,this.camera);
+
+				  if(this.zMode=='periodic') {
+				  	this.zScaled = this.zt*(this.kits.length/this.ztLength);
+				  } else {
+				  	this.zScaled = this.zManual * this.kits.length;
+				  }
+
+				  
+
+				  this.zPlane.position.set(0,0,this.zScaled-0.5);
+				  // this.blitzPlane.position.set(this.xPos,0,this.zScaled);
+
+				  if(Math.floor(this.zScaled)!=this.zCur) {
+				  	this.zCur = Math.floor(this.zScaled);
+
+				  	if(this.zMode=='manual') 
+				  		$('.patternEditor').html(this.renderEditablePattern(this.zCur));
+
+				  	var subval = this.zScaled % this.zCur;
+
+				  	this.zNext = this.zCur+1;
+				  	if(this.zNext>=this.kits.length) this.zNext = 0;
+				  	this.zPrev = this.zCur-1;
+				  	if(this.zPrev<0) this.zPrev = this.kits.length-1;
+				  	// console.log(zPrev,zCur,zNext);
+
+				  	this.gains[this.zPrev].gain.rampTo(0,.01);
+					this.gains[this.zCur].gain.rampTo(1,.01);
+					this.filter.frequency.rampTo(this.cutoffs[this.zCur],.05);
+					this.reverb.wet.rampTo(this.reverbs[this.zCur],.05);
+
+					// change opacity on previous z layer
+					for(var x=0;x<this.steps;x++) {
+						for(var y=0;y<this.tracks;y++) {
+							var v = 'x'+x+'y'+y+'z'+this.zPrev;
+							if(typeof this.materials[v] !== 'undefined') {
+								this.fadeMat(this.materials[v], this.materials[v].opacity, this.opacities.min,{});
+							}
+						}
+					}
+					if(this.zMode=='manual') {
+
+						this.gains[this.zNext].gain.rampTo(0,.01);
+						// change opacity on next z layer too
+						for(var x=0;x<this.steps;x++) {
+							for(var y=0;y<this.tracks;y++) {
+								var v = 'x'+x+'y'+y+'z'+this.zNext;
+								if(typeof this.materials[v] !== 'undefined') {
+									this.fadeMat(this.materials[v], this.materials[v].opacity, this.opacities.min,{});
+								}
+							}
+						}
+					}
+
+
+				  }
+
+				  
+				  this.prev=timestamp;
+				  this.animFrame++;
+				  var _this = this;
+				  window.requestAnimationFrame(function(t){
+				  	_this.step(t);
+				  });
+				}
+				start() {
+			   		if(this.init) {
+				    	Tone.Transport.scheduleRepeat((time) => {
+							// use the callback time to schedule events
+							this.xPos=Math.floor(this.xPos+1);
+							this.xPos=this.xPos%this.steps;
+							this.xyPlane.position.set(this.xPos,0,0);
+							this.xPrev = this.xPos-1;
+							if(this.xPrev<0) this.xPrev=this.steps-1;
+							this.xNext = this.xPos+1;
+							if(this.xNext>=this.steps) this.xNext=0;
+
+							var wait = ((4/this.bpm) / this.steps) * 60 * 1000;
+
+							
+								  
+							// }
+								
+						}, "8n");
+						var _this = this;
+						window.requestAnimationFrame(function(t){
+						  	_this.step(t);
+						});
+						this._playing = true;
+						this.init = false;
+				    	Tone.Transport.start();
+				    }
+				    if (!this._playing) {
+				    	this.xPos=0;
+				    	Tone.Transport.start();
+				    } 
+				}
+				stop() {
+					if(this._playing) {
+						Tone.Transport.stop();
+					}
+				}
+
+				get playing() {
+					return this._playing;
+				}
+				set playing(value) {
+					if(value>0) {
+						this.start();
+						this._playing = 1;
+					} else {
+						console.log('stopping');
+						this.stop();
+						this._playing = 0;
+					}
+				}
+
+				get bpm() {
+					return Tone.Transport.bpm.value;
+				}
+				set bpm(value) {
+					Tone.Transport.bpm.value=value;
+				}
+
+				fadeMat(mat, from, to, options) {
+				    options = options || { wait:0,id:'' };
+				    // set and check 
+				    var current = { value: from },
+				    easing = options.easing || TWEEN.Easing.Linear.None,
+				    duration = options.duration || 500;
+
+				    var _this = this;
+				    var tweenOpacity = new TWEEN.Tween(current)
+				        .to({ value: to }, duration)
+				        // .delay(options.wait)
+				        .easing(easing)
+				        .onUpdate(function() {
+				             
+				                mat.opacity = current.value;
+				             
+				         })
+				         .onComplete(function(){
+				              if(options.id!=='') {
+				              	_this.tweenStates[options.id]=0;
+				              }
+				              if(options.callback){
+				                   options.callback();
+				              }
+				         });
+
+				    tweenOpacity.start();
+				    
+				    return tweenOpacity;
+				}
+
+				
+
+			}
+
+			const queryString = window.location.search;
+			const urlParams = new URLSearchParams(queryString);
+
+			var o = {};
+
+			if(urlParams.has('state')) {
+				o = JSON.parse(window.atob(urlParams.get('state')));
+				console.log(o);
+			}
+
+			var threeq = new Threeq(o);
+
+			$(document).on('click','.cell',function(){
+				var x = $(this).attr('x');
+				var y = $(this).attr('y');
+				var z = $(this).attr('z');
+				if($(this).hasClass('active')) {
+					$(this).removeClass('active');
+					$(this).css({'backgroundColor':'#333333'});
+					threeq.deactivateCell(x,y,z);
+				} else {
+					$(this).addClass('active');
+
+					$(this).css({'background-color':$(this).attr('activecolor')});
+					threeq.activateCell(x,y,z);
+				}
+			});
+			$(document).on('click','.nextPattern,.prevPattern',function(){
+				var z = parseInt($(this).closest('.controlHeading').attr('data-z'));
+				console.log(z);
+				var n = -1;
+				if($(this).hasClass('nextPattern')) {
+					n = z+1;
+					if(n>threeq.kits.length-1) {
+						n = 0;
+					}
+				} else {
+					n = z-1;
+					if(n<0) {
+						n = threeq.kits.length-1;
+					}
+				}
+				console.log(n);
+				$('.patternEditor').html(threeq.renderEditablePattern(n));
+				if(threeq.zMode=='manual') {
+					threeq.gains[threeq.zCur].gain.rampTo(0,.01);
+					for(var x=0;x<threeq.steps;x++) {
+						for(var y=0;y<threeq.tracks;y++) {
+							var v = 'x'+x+'y'+y+'z'+threeq.zCur;
+							if(typeof threeq.materials[v] !== 'undefined') {
+								threeq.fadeMat(threeq.materials[v], threeq.materials[v].opacity, threeq.opacities.min,{});
+							}
+						}
+					}
+					$('input[name="zManual').val(.05+n/threeq.kitUrls.length).change();
+				}
+			});
+			$(document).on('keypress',function(event) {
+				
+				if(event.which==32) {
+					event.preventDefault();
+					if(threeq.playing) {
+						$('.controlOption.stop').click();
+					} else {
+						$('.controlOption.play').click();
+					}
+					return;
+				}
+				var n = event.which-49;
+				if(n>=0&&n<threeq.kitUrls.length) {			
+					$('.patternEditor').html(threeq.renderEditablePattern(n));
+				}
+				if(n!=threeq.zCur&&n>=0&&n<threeq.kitUrls.length) {
+					event.preventDefault();
+					// shut down cells and gain on previous layer
+					
+
+					if(threeq.zMode=='manual') {
+
+						
+						threeq.gains[threeq.zCur].gain.rampTo(0,.01);
+						for(var x=0;x<threeq.steps;x++) {
+							for(var y=0;y<threeq.tracks;y++) {
+								var v = 'x'+x+'y'+y+'z'+threeq.zCur;
+								if(typeof threeq.materials[v] !== 'undefined') {
+									threeq.fadeMat(threeq.materials[v], threeq.materials[v].opacity, threeq.opacities.min,{});
+								}
+							}
+						}
+						$('input[name="zManual').val(.05+n/threeq.kitUrls.length).change();
+					}
+				}
+
+			});
+			
+			
+			
+		})();
+	</script>
+</html>
