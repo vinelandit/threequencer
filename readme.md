@@ -10,16 +10,6 @@ The main codebase is currently just inline JavaScript in the main index.html doc
 
 At present no packaging or compilation is done, so there is no build or src folder. This repo should run as is on any http server it's uploaded to, even one without wider access to the Internet.
 
-## Usage
-
-```python
-import foobar
-
-foobar.pluralize('word') # returns 'words'
-foobar.pluralize('goose') # returns 'geese'
-foobar.singularize('phenomena') # returns 'phenomenon'
-```
-
 ## Contributing
 Feel free to open issues.
 
